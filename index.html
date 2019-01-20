@@ -1,1 +1,220 @@
-123
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'/>
+<title>鯖江カルトクイズ 2013</title>
+<meta property="og:image" content="http://fukuno.jig.jp/2014/sabaeq2013.png">
+<link rel="apple-touch-icon" href="http://fukuno.jig.jp/2014/sabaeq2013.png"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+<script src='http://fukuno.jig.jp/2014/fukuno.js/fukuno.js'></script>
+<script>'use strict';
+
+// LinkData問題 RDF-JSON API URL
+var url = "http://linkdata.org/api/1/rdf1s1063i/sabae_kentei_2013_rdf.json";
+
+var ans;
+var cnt;
+var cntok;
+
+window.onload = function() {
+	var base = "http://linkdata.org/property/" + url.substring(26, url.indexOf('/', 26)) + "#";
+	jsonp(url + "?callback=" + getCallbackMethod(function(data) {
+//		dump(data);
+		var rdf = function(d, name) {
+			return d[name][0].value;
+		};
+		var qs = [];
+		for (var url in data) {
+			var d = data[url];
+			var q = {};
+			q.no = rdf(d, "http://www.w3.org/2000/01/rdf-schema#label");
+			q.question = rdf(d, base + "question");
+			q.choice1 = rdf(d, base + "choice1");
+			q.choice2 = rdf(d, base + "choice2");
+			q.choice3 = rdf(d, base + "choice3");
+			q.choice4 = rdf(d, base + "choice4");
+			q.answer = rdf(d, base + "answerNo");
+			qs.push(q);
+		}
+		ret(qs);
+	}));
+};
+var questions = null;
+var qlen = 0;
+
+var ret = function(qs) {
+//dump(data);
+	questions = qs;
+	qlen = questions.length;
+//	dump(questions);
+
+	cnt = cntok = 0;
+	
+	viewResultStatus();
+	
+	for (var i = 0; i < 4; i++) {
+		get('a' + (i + 1)).onclick = function() {
+			if (cnt >= qlen)
+				return;
+			
+			var b = this.id == 'a' + ans;
+			cnt++;
+			if (b)
+				cntok++;
+			
+			viewResult(b);
+			viewResultStatus();
+			setQ();
+		}
+	}
+	
+	setQ();
+	
+	/*
+	document.body.onkeydown = function(e) {
+		var key = e.keyCcode;
+		alert(key);
+	};
+	*/
+	
+	get('reset').onclick = function() {
+		cnt = cntok = 0;
+		viewResultStatus();
+		setQ();
+	};
+};
+var viewResult = function(b) {
+	var qa = get('qa');
+	qa.innerHTML = b ? '○' : '×';
+	qa.style.color = b ? 'red' : 'blue';
+	qa.style.position = 'absolute';
+	setTimeout(function() {
+		var qa = get('qa');
+		qa.innerHTML = '';
+	}, 250);
+};
+var  random = function(n) {
+	return Math.floor(Math.random() * n);
+};
+var setQ = function() {
+	if (cnt < qlen) {
+		var q = questions[cnt];
+		
+		get('q').innerHTML = '第' + q.no + "問）" + q.question;
+		get('a1').innerHTML = '1. ' + q.choice1;
+		get('a2').innerHTML = '2. ' + q.choice2;
+		get('a3').innerHTML = '3. ' + q.choice3;
+		get('a4').innerHTML = '4. ' + q.choice4;
+		ans = q.answer;
+	} else {
+		get('q').innerHTML = '';
+		get('a1').innerHTML = '全' + qlen + "問を終了しました。おつかれさまでした。";
+		get('a2').innerHTML = qlen + "問中 " + cntok + "問正解";
+		get('a3').innerHTML = '正答率 ' + fix2(cntok / cnt * 100) + "％";
+		get('a4').innerHTML = '';
+	}
+};
+//------------------------------------------------------------------
+// util
+var fix2 = function(val) {
+	var n = Math.floor(val);
+	var n2 = "" + Math.floor(val * 100 - n * 100);
+	if (n2.length == 1)
+		n2 = "0" + n2;
+	return n + "." + n2;
+};
+var viewResultStatus = function() {
+	var s = cntok + "/" + cnt;
+	if (cnt > 0)
+		s += " - " + fix2(cntok / cnt * 100) + "%"
+	get('result').innerHTML = s;
+};
+var xml2json = function(url, callback) {
+	var onlocal = document.location.toString().indexOf('file://') == 0;
+	var host = onlocal ? "localhost:8080" : "fukuno.jig.jp";
+	var base = "http://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
+	var url2 = base + "&cache=no&callback=" + callback + "&url=" + encodeURI(url);
+//	prompt("", url2);
+	jsonp(url2);
+};
+
+</script>
+
+<style>
+body {
+	margin: 0px;
+}
+#qcanvas {
+	text-align: center;
+	user-select: none;
+	-webkit-user-select: none;
+}
+#qa {
+	font-size: 180px;
+	text-align: center;
+	width: 100%;
+}
+#title {
+	font-size: 28px;
+	background: #fbf;
+	padding: 8px;
+}
+#q {
+	text-align: left;
+	font-size: 28px;
+	background: #fcf;
+	width: 100%;
+	padding: 8px 2px 8px 2px;
+}
+.a {
+	text-align: left;
+	font-size: 32px;
+	background: #fdf;
+	width: 100%;
+	cursor: pointer;
+	line-height: 35px;
+	padding: 4px 4px 4px 8px;
+}
+#result {
+	font-size: 20px;
+	background: #fef;
+	padding: 4px 0px 4px 0px;
+}
+#reset {
+	margin: 20px;
+	font-size: 120%;
+	border: 2px solid #333;
+	background: #fff;
+}
+.credit {
+	margin: 30px;
+	font-size: 90%;
+}
+</style>
+</head>
+<body>
+
+<div id='qcanvas'>
+	<div id='title'>鯖江カルトクイズ 2013</div>
+	<div id='q'></div>
+	<div id='qa'></div>
+	<div id='a1' class='a'></div>
+	<div id='a2' class='a'></div>
+	<div id='a3' class='a'></div>
+	<div id='a4' class='a'></div>
+	<div id='result'></div>
+	
+	<button id='reset'>最初から</button>
+</div>
+
+<div class='credit'>
+
+<a href=http://fukuno.jig.jp/2012/sabaeq target=_blank>鯖江カルトクイズ</a>の2013年度版です。LinkDataのデータに対応しているので、改造していろいろなクイズアプリの元にしてみてください。<br>
+データ：<a target=_blank href=http://linkdata.org/work/rdf1s1063i>鯖江検定２０１３年｜オープンデータ共有＆ダウンロード｜LinkData</a><br>
+アプリ：<a href='http://fukuno.jig.jp/'>CC BY 福野泰介</a><br>
+
+</div>
+
+</body>
+</html>
