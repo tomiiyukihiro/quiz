@@ -11,14 +11,14 @@
 <script>'use strict';
 
 // LinkData問題 RDF-JSON API URL
-var url = "http://linkdata.org/api/1/rdf1s1063i/sabae_kentei_2013_rdf.json";
+var url = "https://linkdata.org/api/1/rdf1s1063i/sabae_kentei_2013_rdf.json";
 
 var ans;
 var cnt;
 var cntok;
 
 window.onload = function() {
-	var base = "http://linkdata.org/property/" + url.substring(26, url.indexOf('/', 26)) + "#";
+	var base = "https://linkdata.org/property/" + url.substring(26, url.indexOf('/', 26)) + "#";
 	jsonp(url + "?callback=" + getCallbackMethod(function(data) {
 //		dump(data);
 		var rdf = function(d, name) {
@@ -28,7 +28,7 @@ window.onload = function() {
 		for (var url in data) {
 			var d = data[url];
 			var q = {};
-			q.no = rdf(d, "http://www.w3.org/2000/01/rdf-schema#label");
+			q.no = rdf(d, "https://www.w3.org/2000/01/rdf-schema#label");
 			q.question = rdf(d, base + "question");
 			q.choice1 = rdf(d, base + "choice1");
 			q.choice2 = rdf(d, base + "choice2");
@@ -133,7 +133,7 @@ var viewResultStatus = function() {
 var xml2json = function(url, callback) {
 	var onlocal = document.location.toString().indexOf('file://') == 0;
 	var host = onlocal ? "localhost:8080" : "fukuno.jig.jp";
-	var base = "http://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
+	var base = "https://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
 	var url2 = base + "&cache=no&callback=" + callback + "&url=" + encodeURI(url);
 //	prompt("", url2);
 	jsonp(url2);
@@ -210,7 +210,7 @@ body {
 
 <div class='credit'>
 
-<a href=http://fukuno.jig.jp/2012/sabaeq target=_blank>鯖江カルトクイズ</a>の2013年度版です。LinkDataのデータに対応しているので、改造していろいろなクイズアプリの元にしてみてください。<br>
+
 データ：<a target=_blank href=http://linkdata.org/work/rdf1s1063i>鯖江検定２０１３年｜オープンデータ共有＆ダウンロード｜LinkData</a><br>
 アプリ：<a href='http://fukuno.jig.jp/'>CC BY 福野泰介</a><br>
 
